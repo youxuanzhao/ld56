@@ -1,0 +1,67 @@
+[gd_scene load_steps=8 format=3 uid="uid://cwl0sriu1tpyi"]
+
+[ext_resource type="Script" path="res://assets/GameManager.gd" id="1_2kt8b"]
+[ext_resource type="Script" path="res://scripts/console.gd" id="1_vx0nr"]
+[ext_resource type="Script" path="res://scripts/camera_controller.gd" id="2_ffsc7"]
+[ext_resource type="Script" path="res://scripts/population.gd" id="4_rjp1u"]
+
+[sub_resource type="SystemFont" id="SystemFont_uhpga"]
+font_names = PackedStringArray("JetBrains Mono")
+
+[sub_resource type="SystemFont" id="SystemFont_yn3ny"]
+font_names = PackedStringArray("JetBrains Mono")
+
+[sub_resource type="LabelSettings" id="LabelSettings_5ioh7"]
+font = SubResource("SystemFont_yn3ny")
+font_size = 28
+
+[node name="GameManager" type="Node2D"]
+script = ExtResource("1_2kt8b")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="Console" type="Control" parent="CanvasLayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_vx0nr")
+
+[node name="ConsoleInput" type="TextEdit" parent="CanvasLayer/Console"]
+layout_mode = 0
+offset_left = 1.0
+offset_top = 1212.0
+offset_right = 1280.0
+offset_bottom = 1280.0
+theme_override_fonts/font = SubResource("SystemFont_uhpga")
+theme_override_font_sizes/font_size = 28
+placeholder_text = "Input your command here:"
+caret_blink = true
+
+[node name="ConsoleLog" type="Label" parent="CanvasLayer/Console"]
+layout_mode = 0
+offset_left = 13.0
+offset_top = 978.0
+offset_right = 1260.0
+offset_bottom = 1199.0
+text = "Created abc.
+How are you.
+Fine
+Ok
+Good"
+label_settings = SubResource("LabelSettings_5ioh7")
+vertical_alignment = 2
+clip_text = true
+
+[node name="Camera2D" type="Camera2D" parent="."]
+zoom = Vector2(4, 4)
+script = ExtResource("2_ffsc7")
+
+[node name="Population" type="Node2D" parent="."]
+script = ExtResource("4_rjp1u")
+
+[connection signal="mouse_entered" from="CanvasLayer/Console/ConsoleInput" to="CanvasLayer/Console" method="_on_console_input_mouse_entered"]
+[connection signal="mouse_exited" from="CanvasLayer/Console/ConsoleInput" to="CanvasLayer/Console" method="_on_console_input_mouse_exited"]
+[connection signal="text_changed" from="CanvasLayer/Console/ConsoleInput" to="CanvasLayer/Console" method="_on_console_input_text_changed"]
