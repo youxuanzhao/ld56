@@ -3,197 +3,29 @@ class_name GameManager
 
 static var instance: GameManager = self
 
+@onready var camera: Camera2D = $Camera2D
+@onready var time_display: Label = $CanvasLayer/TimeDisplay
+@onready var title_display: Label = $CanvasLayer/Title
+@onready var tick_timer: Timer = $Timer
+
 var is_input_mode: bool = false
 var current_civilization_name: String = ""
 var year_length: int = 365
 var current_tick: int = 0
-var tick_per_second: int = 1
+var seconds_per_tick: float = 1
+var is_game_running: bool = false
+var border_line: Line2D
 
-var female_names: Array[String] = [
-	"Abigail",
-	"Alexandra",
-	"Alison",
-	"Amanda",
-	"Amelia",
-	"Amy",
-	"Andrea",
-	"Angela",
-	"Anna",
-	"Anne",
-	"Audrey",
-	"Ava",
-	"Bella",
-	"Bernadette",
-	"Carol",
-	"Caroline",
-	"Carolyn",
-	"Chloe",
-	"Claire",
-	"Deirdre",
-	"Diana",
-	"Diane",
-	"Donna",
-	"Dorothy",
-	"Elizabeth",
-	"Ella",
-	"Emily",
-	"Emma",
-	"Faith",
-	"Felicity",
-	"Fiona",
-	"Gabrielle",
-	"Grace",
-	"Hannah",
-	"Heather",
-	"Irene",
-	"Jan",
-	"Jane",
-	"Jasmine",
-	"Jennifer",
-	"Jessica",
-	"Joan",
-	"Joanne",
-	"Julia",
-	"Karen",
-	"Katherine",
-	"Kimberly",
-	"Kylie",
-	"Lauren",
-	"Leah",
-	"Lillian",
-	"Lily",
-	"Lisa",
-	"Madeleine",
-	"Maria",
-	"Mary",
-	"Megan",
-	"Melanie",
-	"Michelle",
-	"Molly",
-	"Natalie",
-	"Nicola",
-	"Olivia",
-	"Penelope",
-	"Pippa",
-	"Rachel",
-	"Rebecca",
-	"Rose",
-	"Ruth",
-	"Sally",
-	"Samantha",
-	"Sarah",
-	"Sonia",
-	"Sophie",
-	"Stephanie",
-	"Sue",
-	"Theresa",
-	"Tracey",
-	"Una",
-	"Vanessa",
-	"Victoria",
-	"Virginia",
-	"Wanda",
-	"Wendy",
-	"Yvonne",
-	"Zoe"
-]
 
-var male_names: Array[String] = [
-	"Adam",
-	"Adrian",
-	"Alan",
-	"Alexander",
-	"Andrew",
-	"Anthony",
-	"Austin",
-	"Benjamin",
-	"Blake",
-	"Boris",
-	"Brandon",
-	"Brian",
-	"Cameron",
-	"Carl",
-	"Charles",
-	"Christian",
-	"Christopher",
-	"Colin",
-	"Connor",
-	"Dan",
-	"David",
-	"Dominic",
-	"Dylan",
-	"Edward",
-	"Eric",
-	"Evan",
-	"Frank",
-	"Gavin",
-	"Gordon",
-	"Harry",
-	"Ian",
-	"Isaac",
-	"Jack",
-	"Jacob",
-	"Jake",
-	"James",
-	"Jason",
-	"Joe",
-	"John",
-	"Jonathan",
-	"Joseph",
-	"Joshua",
-	"Julian",
-	"Justin",
-	"Keith",
-	"Kevin",
-	"Leonard",
-	"Liam",
-	"Lucas",
-	"Luke",
-	"Matt",
-	"Max",
-	"Michael",
-	"Nathan",
-	"Neil",
-	"Nicholas",
-	"Oliver",
-	"Owen",
-	"Paul",
-	"Peter",
-	"Phil",
-	"Piers",
-	"Richard",
-	"Robert",
-	"Ryan",
-	"Sam",
-	"Sean",
-	"Sebastian",
-	"Simon",
-	"Stephen",
-	"Steven",
-	"Stewart",
-	"Thomas",
-	"Tim",
-	"Trevor",
-	"Victor",
-	"Warren",
-	"William"
-]
-var last_names: Array[String] = [
-	"Smith",
-	"Jones",
-	"Taylor",
-	"Brown",
-	"Williams",
-	"Wilson",
-	"Johnson",
-	"Davies"
-]
-
-var current_inspection: GameObject
+var area_width: int = 200
+var area_height: int = 200
 
 const MISSING_PARAM: String = "Missing parameter(s)."
+const INCORRECT_PARAM: String = "Incorrect parameter."
 const FAILED_TO_READ: String = "Failed to read command."
+const RESET_CAM: String = "Reset camera position."
 
+var time_count: float = 0
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -207,6 +39,30 @@ func _process(delta: float) -> void:
 func analyze(command: String) -> String:
 	var command_composition: PackedStringArray = command.replace("\n","").split(" ")
 	match command_composition[0]:
+		"restart":
+			get_tree().reload_current_scene()
+			return "Restarted the game."
+		"thanos":
+			return kill_half_population()
+		"set_game_area":
+			if command_composition.size() < 3:
+				return MISSING_PARAM
+			else:
+				return set_game_area(command_composition[1], command_composition[2])
+		"unpause":
+			return set_game_speed("1")
+		"resume":
+			return set_game_speed("1")
+		"pause":
+			return set_game_speed("0")
+		"set_game_speed":
+			if command_composition.size() < 2:
+				return MISSING_PARAM
+			else:
+				return set_game_speed(command_composition[1])
+		"reset_camera":
+			camera.position = Vector2.ZERO
+			return RESET_CAM
 		"start":
 			if command_composition.size() < 2:
 				return MISSING_PARAM
@@ -215,28 +71,80 @@ func analyze(command: String) -> String:
 		_:
 			return FAILED_TO_READ
 
+func set_game_area(width: String, height: String) -> String:
+	if !width.is_valid_int() or !height.is_valid_int():
+		return INCORRECT_PARAM
+	else:
+		area_width = int(width)
+		area_height = int(height)
+		if border_line != null:
+			border_line.queue_free()
+		border_line = Line2D.new()
+		var points: PackedVector2Array = [Vector2(0-area_width/2,0-area_height/2), Vector2(0+area_width/2,0-area_height/2), Vector2(0+area_width/2,0+area_height/2), Vector2(0-area_width/2,0+area_height/2), Vector2(0-area_width/2,0-area_height/2)]
+		border_line.points = points
+		border_line.width = 1
+		add_child(border_line)
+		return "Set game area to " + width + "x" + height + "."
+		
+
 func start_new_game(argument: String) -> String:
 	current_civilization_name = argument
-	return "Started a new civilization of" + argument + "."
+	current_tick = 0
+	seconds_per_tick = 1
+	is_game_running = true
+	update_title()
+	update_time_display()
+	tick_timer.start(seconds_per_tick)
+	var temp_family = Population.instance.create_new_family()
+	Population.instance.spawn_citizen(temp_family,"male",0)
+	Population.instance.spawn_citizen(temp_family,"male",0)
+	Population.instance.spawn_citizen(temp_family,"female",0)
+	Population.instance.spawn_citizen(temp_family,"female",0)
+	var another_family = Population.instance.create_new_family()
+	Population.instance.spawn_citizen(another_family,"male",0)
+	Population.instance.spawn_citizen(another_family,"male",0)
+	Population.instance.spawn_citizen(another_family,"female",0)
+	Population.instance.spawn_citizen(another_family,"female",0)
+	
+	return "Started a new civilization of " + argument + "."
 
-func set_inspector(target: GameObject) -> void:
-	current_inspection = target
-
-func generate_first_name(gender: String) -> String:
-	match gender:
-		"male":
-			return male_names[randi_range(0,male_names.size())]
-		"female":
-			return female_names[randi_range(0,female_names.size())]
-		_:
-			return "Jesus"
+func set_game_speed(argument: String) -> String:
+	if argument.is_valid_float():
+		if float(argument) <= 0:
+			tick_timer.paused = true
+			return "You paused the game."
+		else:
+			tick_timer.paused = false
+			seconds_per_tick = 1/float(argument)
+		return "Set game speed to " + argument + "."
+	else:
+		return INCORRECT_PARAM
 
 func convert_tick_to_date(tick: int) -> String:
 	var year: int = 0
 	var day: int = 0
 	year = tick / year_length
 	day = tick % year_length
-	return "Year " + str(year) + " Day " + str(day)
+	return "Y" + str(year) + ", D" + str(day)
 
-func generate_last_name() -> String:
-	return last_names[randi_range(0,last_names.size())]
+func update_title() -> void:
+	title_display.text = str(current_civilization_name," (",Population.instance.total_population,")")
+
+func update_time_display() -> void:
+	time_display.text = convert_tick_to_date(current_tick)
+
+func kill_half_population() -> String:
+	var count = 0
+	for citizen in Population.instance.get_children():
+		if randi()%2 == 1:
+			count+=1
+			citizen.die()
+	return "Great! You just removed "+str(count)+" lives!"
+
+func _on_timer_timeout() -> void:
+	current_tick += 1
+	Population.instance.tick_every_citizen()
+	Inspector.instance.update_inspector_display()
+	update_title()
+	update_time_display()
+	tick_timer.start(seconds_per_tick)

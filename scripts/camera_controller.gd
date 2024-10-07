@@ -13,10 +13,10 @@ func _ready() -> void:
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
-	if Input.is_action_just_pressed("camera_high"):
+	if Input.is_action_just_pressed("camera_high") and !GameManager.instance.is_input_mode:
 		zoom.x -= 1
 		zoom.y -= 1
-	if Input.is_action_just_pressed("camera_low"):
+	if Input.is_action_just_pressed("camera_low") and !GameManager.instance.is_input_mode:
 		zoom.x += 1
 		zoom.y += 1
 	

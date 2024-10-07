@@ -22,7 +22,7 @@ func _process(delta: float) -> void:
 	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and on_hover:
 		console_input.editable = true	
 	
-	if Input.is_action_just_pressed("command_enter"):
+	if Input.is_action_just_pressed("command_enter") and GameManager.instance.is_input_mode:
 		msg.append(GameManager.instance.analyze(console_input.text))
 		if msg.size() > 5:
 			msg = msg.slice(1)
