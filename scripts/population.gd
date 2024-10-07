@@ -14,4 +14,4 @@ func _process(delta: float) -> void:
 	pass
 
 func spawn_citizen() -> Citizen:
-	pass
+	return Citizen.new(Family.new())

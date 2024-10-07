@@ -1,0 +1,8 @@
+[gd_resource type="LabelSettings" load_steps=2 format=3 uid="uid://csb7d2qtd8fib"]
+
+[sub_resource type="SystemFont" id="SystemFont_yn3ny"]
+font_names = PackedStringArray("JetBrains Mono")
+
+[resource]
+font = SubResource("SystemFont_yn3ny")
+font_size = 24

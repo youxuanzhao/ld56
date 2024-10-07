@@ -11,8 +11,14 @@ var first_name: String
 var family_name : String
 var family: Family
 var age: int
-var birthdate: int
+var birth_tick: int
+var birth_date: String
 var gender: String
+
+var father: Citizen
+var mother: Citizen
+var spouse: Citizen
+var children: Array[Citizen]
 
 
 # Called when the node enters the scene tree for the first time.
@@ -23,7 +29,26 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	pass
 
-func _init(family_name: String, ) -> void:
+func _init(_family: Family) -> void:
+	family = _family
+	family_name = family.family_name
+	match randi() % 2:
+		0:
+			gender = "male"
+		1: 
+			gender = "female"
+	first_name = GameManager.instance.generate_first_name(gender)
+	age = 0
+	birth_tick = GameManager.instance.current_tick
+	birth_date = GameManager.instance.convert_tick_to_date(birth_tick)
+
+func tick() -> void:
+	make_decision()
+	age = (GameManager.instance.current_tick - birth_tick) / GameManager.instance.year_length
+	if age < 0:
+		age = 0
+
+func make_decision() -> void:
 	pass
 
 
