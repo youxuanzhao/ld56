@@ -82,6 +82,7 @@ func _init(_family: Family, _gender: String, _birth_tick: int = GameManager.inst
 	birth_date = GameManager.instance.convert_tick_to_date(birth_tick)
 	make_decision()
 
+# Fix this
 func tick() -> void:
 	if is_alive:
 		if randi()%100 <= 100 - (life_expectancy - age)*2 and age>=40:

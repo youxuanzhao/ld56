@@ -1,13 +1,16 @@
-[gd_scene load_steps=10 format=3 uid="uid://cwl0sriu1tpyi"]
+[gd_scene load_steps=11 format=3 uid="uid://cwl0sriu1tpyi"]
 
-[ext_resource type="Script" path="res://scripts/game_manager.gd" id="1_gepqi"]
-[ext_resource type="Script" path="res://scripts/console.gd" id="1_vx0nr"]
-[ext_resource type="Script" path="res://scripts/camera_controller.gd" id="2_ffsc7"]
+[ext_resource type="Script" uid="uid://ccpmhdm7gmoj3" path="res://scripts/game_manager.gd" id="1_gepqi"]
+[ext_resource type="Script" uid="uid://4x17gsn15nyj" path="res://scripts/console.gd" id="1_vx0nr"]
+[ext_resource type="Script" uid="uid://12ruyhc03ge6" path="res://scripts/camera_controller.gd" id="2_ffsc7"]
 [ext_resource type="LabelSettings" uid="uid://csb7d2qtd8fib" path="res://label.tres" id="3_231nr"]
-[ext_resource type="Script" path="res://scripts/inspector.gd" id="4_efk04"]
-[ext_resource type="Script" path="res://scripts/population.gd" id="4_rjp1u"]
+[ext_resource type="Script" uid="uid://bkqsuu78tnosi" path="res://scripts/inspector.gd" id="4_efk04"]
+[ext_resource type="Script" uid="uid://d06tg2kda0ucg" path="res://scripts/population.gd" id="4_rjp1u"]
 
 [sub_resource type="SystemFont" id="SystemFont_uhpga"]
+font_names = PackedStringArray("JetBrains Mono")
+
+[sub_resource type="SystemFont" id="SystemFont_7mycd"]
 font_names = PackedStringArray("JetBrains Mono")
 
 [sub_resource type="SystemFont" id="SystemFont_thatx"]
@@ -44,20 +47,21 @@ theme_override_font_sizes/font_size = 28
 placeholder_text = "Input your command here:"
 caret_blink = true
 
-[node name="ConsoleLog" type="Label" parent="CanvasLayer/Console"]
+[node name="ConsoleLog" type="RichTextLabel" parent="CanvasLayer/Console"]
 layout_mode = 0
 offset_left = 13.0
-offset_top = 978.0
+offset_top = 841.0
 offset_right = 1260.0
 offset_bottom = 1199.0
+theme_override_fonts/normal_font = SubResource("SystemFont_7mycd")
+theme_override_font_sizes/normal_font_size = 28
 text = "Created abc.
 How are you.
 Fine
 Ok
 Good"
-label_settings = ExtResource("3_231nr")
+scroll_following = true
 vertical_alignment = 2
-clip_text = true
 
 [node name="Inspector" type="Control" parent="CanvasLayer"]
 layout_mode = 3

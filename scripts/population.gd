@@ -205,6 +205,7 @@ func generate_last_name() -> String:
 func _process(delta: float) -> void:
 	pass
 
+# I believe this is the performance consuming function
 func tick_every_citizen() -> void:
 	for citizen in get_children():
 		citizen.tick()

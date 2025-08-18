@@ -2,7 +2,7 @@ extends Control
 class_name Console
 
 @onready var console_input: TextEdit = $ConsoleInput
-@onready var console_log_display: Label = $ConsoleLog
+@onready var console_log_display: RichTextLabel = $ConsoleLog
 
 static var instance: Console = self
 
